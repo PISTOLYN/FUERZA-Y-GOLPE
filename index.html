@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TEST YOUR MIGHT — Desafío de Fuerza</title>
+<style>
+:root{--blue:#168cff;--red:#ff304b;--gold:#ffd34d;--bg:#070b1c;--panel:#101a36;--muted:#a9b7d8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0%,#1d2b5a 0,#090f27 45%,#050814 100%);color:#fff;font-family:Arial,Helvetica,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:11px 16px;font-weight:900;color:#fff;background:#25365f}button:hover{filter:brightness(1.15)}button:disabled{opacity:.45;cursor:not-allowed}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #33436b;background:#080e20cc;position:sticky;top:0;z-index:5}
+.brand{font-size:clamp(20px,3vw,34px);font-weight:1000;font-style:italic;letter-spacing:1px;text-shadow:0 3px 0 #7d2800,0 0 18px #ffbb33}.brand span{color:var(--gold)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{font-size:13px}
+main{max-width:1450px;margin:auto;padding:16px}
+.hud{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:14px}
+.player-name{padding:12px;border-radius:12px;font-weight:1000;text-align:center;letter-spacing:1px}
+.blue-name{background:linear-gradient(90deg,#063e8d,#168cff);box-shadow:0 0 20px #168cff66}.red-name{background:linear-gradient(90deg,#a90e28,#ff304b);box-shadow:0 0 20px #ff304b66}
+.timerbox{text-align:center;min-width:125px}.timer{font-size:clamp(30px,5vw,48px);font-weight:1000;color:var(--gold);text-shadow:0 0 15px #ffb000}.timer-label{font-size:10px;letter-spacing:2px;color:var(--muted)}
+.arena{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.player{position:relative;overflow:hidden;border:2px solid #2d4b80;border-radius:18px;min-height:490px;padding:16px;background:linear-gradient(180deg,#14234b 0%,#101b37 55%,#101326 100%);box-shadow:inset 0 0 50px #0008}
+.player.red{border-color:#8e2941;background:linear-gradient(180deg,#451d3b 0%,#25192f 55%,#141326 100%)}
+.player:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 70px,#ffffff08 71px 73px),linear-gradient(180deg,transparent 65%,#fff1 66%,transparent 67%);pointer-events:none}
+.powerhead{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}.powerhead strong{font-size:14px;letter-spacing:1px}.percent{font-size:26px;font-weight:1000}.blue .percent{color:#55baff}.red .percent{color:#ff667b}
+.meter{height:17px;background:#050916;border:1px solid #53658e;border-radius:20px;margin:8px 0 0;overflow:hidden;position:relative;z-index:1}.fill{height:100%;width:0%;transition:width .08s linear;background:linear-gradient(90deg,#0075ff,#6de7ff);box-shadow:0 0 16px #168cff}.red .fill{background:linear-gradient(90deg,#ff253e,#ffb34d);box-shadow:0 0 16px #ff304b}
+.stage{height:275px;position:relative;display:flex;align-items:flex-end;justify-content:center;z-index:1}
+.floor{position:absolute;bottom:0;left:-16px;right:-16px;height:42px;background:repeating-linear-gradient(90deg,#29375b 0 55px,#36466d 56px 58px);border-top:3px solid #7182a8;transform:perspective(100px) rotateX(3deg)}
+.character{position:relative;width:150px;height:240px;margin-bottom:26px;z-index:2;transform-origin:50% 100%;filter:drop-shadow(0 10px 8px #0009)}
+.head{position:absolute;top:5px;left:51px;width:48px;height:52px;border-radius:45% 45% 48% 48%;background:linear-gradient(110deg,#e8b88e,#9f654c);border:3px solid #2b2030}
+.hair{position:absolute;top:0;left:47px;width:56px;height:22px;border-radius:60% 60% 15% 15%;background:#201c2a;z-index:3}
+.red .hair{background:#34212b}
+.body{position:absolute;top:58px;left:34px;width:82px;height:100px;background:linear-gradient(100deg,#fff,#b9c6dc);clip-path:polygon(18% 0,82% 0,100% 80%,70% 100%,50% 75%,28% 100%,0 80%);border-radius:12px}
+.belt{position:absolute;top:133px;left:42px;width:66px;height:9px;background:#171923;z-index:4}
+.leg{position:absolute;top:147px;width:36px;height:88px;background:linear-gradient(90deg,#dce5f5,#8796b1);border-radius:8px 8px 14px 14px}.leg.left{left:40px;transform:rotate(7deg)}.leg.right{left:77px;transform:rotate(-7deg)}
+.arm{position:absolute;top:73px;width:27px;height:100px;background:linear-gradient(90deg,#fff,#aab8d0);border-radius:18px;transform-origin:50% 10%;z-index:4}
+.arm.left{left:25px;transform:rotate(28deg)}.arm.right{right:23px;transform:rotate(-25deg)}
+.hand{position:absolute;bottom:-14px;left:-3px;width:34px;height:34px;border-radius:50%;background:#dca77d;border:3px solid #69452f;box-shadow:inset -4px -3px #0002}
+.character.strike .arm.right{animation:chop .48s ease-in forwards}.character.strike .hand{background:#f1c39b}
+.character.fail .arm.right{animation:failchop .55s ease-in forwards}.character.fail .hand{background:#ff172f;box-shadow:0 0 18px 9px #ff102b;transform:scale(1.8)}
+@keyframes chop{0%{transform:rotate(-25deg)}45%{transform:rotate(65deg)}100%{transform:rotate(110deg)}}
+@keyframes failchop{0%{transform:rotate(-25deg)}45%{transform:rotate(65deg)}100%{transform:rotate(110deg)}}
+.board{position:absolute;bottom:17px;width:220px;height:70px;z-index:3;display:flex;flex-direction:column;gap:3px;align-items:center}
+.plank{height:18px;width:100%;border:2px solid #593313;border-radius:3px;background:repeating-linear-gradient(0deg,#b87932 0 4px,#98602b 5px 8px);box-shadow:0 3px 4px #0009;transition:transform .5s,opacity .5s}
+.board.broken .plank:nth-child(odd){transform:translate(-65px,-20px) rotate(-23deg);opacity:0}.board.broken .plank:nth-child(even){transform:translate(65px,12px) rotate(25deg);opacity:0}
+.status{position:relative;z-index:2;text-align:center;min-height:25px;font-weight:900;color:#dce8ff;font-size:13px;letter-spacing:.5px}
+.controls{position:relative;z-index:2;display:flex;justify-content:center;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.keycap{display:inline-flex;min-width:42px;height:38px;align-items:center;justify-content:center;border-radius:8px;background:#07142e;border:2px solid #61b7ff;color:#fff;font-size:20px;font-weight:1000;box-shadow:0 3px 0 #034c9d}
+.red .keycap{border-color:#ff7285;box-shadow:0 3px 0 #a30d28}
+.bottom{text-align:center;color:#aebbd8;font-size:12px;margin:16px 0}
+.overlay{position:fixed;inset:0;background:#020617dd;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}.overlay.show{display:flex}
+.modal{width:min(720px,100%);max-height:90vh;overflow:auto;background:#101a36;border:1px solid #52658e;border-radius:18px;padding:22px;box-shadow:0 20px 80px #000b}
+.modal h2{margin:0 0 16px;color:var(--gold)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px;color:#c8d4f0;font-size:13px}.field input,.field select{background:#071127;border:1px solid #40547e;border-radius:8px;color:#fff;padding:10px;width:100%}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.primary{background:linear-gradient(90deg,#0878ee,#25b8ff)}.danger{background:#a9233a}.notice{color:#b7c6e7;font-size:12px;line-height:1.5;margin-top:12px}
+.result{font-size:clamp(28px,5vw,46px);text-align:center;font-weight:1000;color:var(--gold);margin:12px}
+@media(max-width:760px){.arena{grid-template-columns:1fr}.player{min-height:420px}.stage{height:245px}.hud{grid-template-columns:1fr 1fr}.timerbox{grid-column:1/-1;grid-row:1}.formgrid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style></head>
+<body>
+<header class="top"><div class="brand">TEST YOUR <span>MIGHT</span></div><div class="actions"><button id="startBtn" class="primary">▶ NUEVA PARTIDA</button><button id="settingsBtn">⚙ CONFIGURACIÓN</button><button id="audioBtn">♫ AUDIO</button><button id="fullscreenBtn">⛶ PANTALLA COMPLETA</button></div></header>
+<main>
+ <section class="hud">
+  <div class="player-name blue-name" id="name1">JUGADOR 1 · AZUL</div>
+  <div class="timerbox"><div class="timer" id="timer">20</div><div class="timer-label">SEGUNDOS RESTANTES</div></div>
+  <div class="player-name red-name" id="name2">JUGADOR 2 · ROJO</div>
+ </section>
+ <section class="arena">
+  <article class="player blue" id="p1">
+   <div class="powerhead"><strong>FUERZA · AZUL</strong><span class="percent" id="pct1">0%</span></div><div class="meter"><div class="fill" id="fill1"></div></div>
+   <div class="stage"><div class="character" id="char1"><div class="hair"></div><div class="head"></div><div class="body"></div><div class="belt"></div><div class="leg left"></div><div class="leg right"></div><div class="arm left"><div class="hand"></div></div><div class="arm right"><div class="hand"></div></div></div><div class="board" id="board1"><div class="plank"></div><div class="plank"></div><div class="plank"></div></div><div class="floor"></div></div>
+   <div class="status" id="status1">¡PREPÁRATE!</div><div class="controls"><span>TECLADO / PULSADOR</span><span class="keycap" id="key1">A</span><span>BOTÓN 1</span></div>
+  </article>
+  <article class="player red" id="p2">
+   <div class="powerhead"><strong>FUERZA · ROJO</strong><span class="percent" id="pct2">0%</span></div><div class="meter"><div class="fill" id="fill2"></div></div>
+   <div class="stage"><div class="character" id="char2"><div class="hair"></div><div class="head"></div><div class="body"></div><div class="belt"></div><div class="leg left"></div><div class="leg right"></div><div class="arm left"><div class="hand"></div></div><div class="arm right"><div class="hand"></div></div></div><div class="board" id="board2"><div class="plank"></div><div class="plank"></div><div class="plank"></div></div><div class="floor"></div></div>
+   <div class="status" id="status2">¡PREPÁRATE!</div><div class="controls"><span>TECLADO / PULSADOR</span><span class="keycap" id="key2">L</span><span>BOTÓN 2</span></div>
+  </article>
+ </section>
+ <div class="bottom">Presiona repetidamente tu tecla o pulsador para llenar tu medidor. El primero en llegar al 100% rompe la tabla y gana.</div>
+</main>
+<div class="overlay" id="settingsOverlay"><div class="modal"><h2>⚙ CONFIGURACIÓN DEL JUEGO</h2>
+ <div class="formgrid">
+  <label class="field">Nombre jugador 1<input id="cfgName1" value="JUGADOR 1 · AZUL"></label>
+  <label class="field">Nombre jugador 2<input id="cfgName2" value="JUGADOR 2 · ROJO"></label>
+  <label class="field">Tiempo de competencia (segundos)<input id="cfgTime" type="number" min="5" max="180" value="20"></label>
+  <label class="field">Incremento por pulsación (%)<input id="cfgPower" type="number" min="1" max="50" value="8"></label>
+  <label class="field">Tecla jugador 1<input id="cfgKey1" maxlength="1" value="a"></label>
+  <label class="field">Tecla jugador 2<input id="cfgKey2" maxlength="1" value="l"></label>
+  <label class="field">Volumen general (%)<input id="cfgVolume" type="number" min="0" max="100" value="65"></label>
+  <label class="field">Modo de entrada<select id="cfgInput"><option value="both">Teclado + controles de juego</option><option value="keyboard">Solo teclado</option><option value="gamepad">Solo controles de juego (Gamepad API)</option></select></label>
+  <label class="field">Música de competencia (MP3/WAV)<input id="musicFile" type="file" accept="audio/*"></label>
+  <label class="field">Sonido de golpe/tabla (MP3/WAV)<input id="hitFile" type="file" accept="audio/*"></label>
+  <label class="field">Sonido de victoria (MP3/WAV)<input id="winFile" type="file" accept="audio/*"></label>
+  <label class="field">Sonido de fallo (MP3/WAV)<input id="failFile" type="file" accept="audio/*"></label>
+ </div>
+ <div class="notice">Los cambios de nombres, tiempo, teclas y volumen se guardan en este navegador. Los archivos de audio seleccionados se usan durante esta sesión. Para pulsadores USB, la mayoría de botoneras tipo arcade se reconocen como teclado; también se admite Gamepad API si el dispositivo se presenta como control de juego. Arduino serial requiere el módulo de escritorio y una integración específica.</div>
+ <div class="modal-actions"><button id="closeSettings">CANCELAR</button><button class="primary" id="saveSettings">GUARDAR CAMBIOS</button></div>
+ </div></div>
+<div class="overlay" id="resultOverlay"><div class="modal"><h2>RESULTADO DE LA COMPETENCIA</h2><div class="result" id="resultText">¡GANADOR!</div><p id="resultDetail" style="text-align:center;color:#cbd6ef"></p><div class="modal-actions"><button id="resultClose">CERRAR</button><button class="primary" id="playAgain">JUGAR OTRA VEZ</button></div></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const defaults={time:20,power:8,key1:'a',key2:'l',name1:'JUGADOR 1 · AZUL',name2:'JUGADOR 2 · ROJO',volume:65,input:'both'};
+let cfg={...defaults,...JSON.parse(localStorage.getItem('tymConfig')||'{}')};
+let audio={music:null,hit:null,win:null,fail:null}, audioCtx=null, running=false, accepting=false, ended=false, remaining=cfg.time, values=[0,0], lastFrame=0, gamepadLoop=null, musicObject=null;
+function applyCfg(){ $('name1').textContent=cfg.name1;$('name2').textContent=cfg.name2;$('key1').textContent=cfg.key1.toUpperCase();$('key2').textContent=cfg.key2.toUpperCase();$('timer').textContent=cfg.time;
+ $('cfgName1').value=cfg.name1;$('cfgName2').value=cfg.name2;$('cfgTime').value=cfg.time;$('cfgPower').value=cfg.power;$('cfgKey1').value=cfg.key1;$('cfgKey2').value=cfg.key2;$('cfgVolume').value=cfg.volume;$('cfgInput').value=cfg.input;}
+function beep(freq=500,duration=.08,type='sine'){try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=(cfg.volume/100)*.12;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.stop(audioCtx.currentTime+duration)}catch(e){}}
+function playFile(kind){let f=audio[kind];if(f){f.currentTime=0;f.volume=cfg.volume/100;f.play().catch(()=>{});}else if(kind==='hit')beep(180,.13,'sawtooth');else if(kind==='win')beep(880,.35);else if(kind==='fail')beep(100,.35,'square');}
+function resetVisual(){for(let i=1;i<=2;i++){ $('pct'+i).textContent='0%';$('fill'+i).style.width='0%';$('status'+i).textContent='¡PREPÁRATE!';$('char'+i).className='character';$('board'+i).className='board';} }
+function startGame(){if(running)return;values=[0,0];remaining=Number(cfg.time);ended=false;running=true;accepting=false;resetVisual();$('timer').textContent=remaining;$('startBtn').disabled=true;$('status1').textContent='¡PRESIONA '+cfg.key1.toUpperCase()+'!';$('status2').textContent='¡PRESIONA '+cfg.key2.toUpperCase()+'!';beep(650,.15);let count=3;$('timer').textContent=count;
+ let c=setInterval(()=>{if(!running){clearInterval(c);return;}count--;if(count>0){$('timer').textContent=count;beep(650,.12)}else{clearInterval(c);remaining=Number(cfg.time);accepting=true;$('timer').textContent=remaining;lastFrame=performance.now();requestAnimationFrame(tick);startGamepad();if(musicObject){musicObject.currentTime=0;musicObject.volume=cfg.volume/100;musicObject.loop=true;musicObject.play().catch(()=>{});}}},700);}
+function tick(t){if(!running)return;let dt=Math.min((t-lastFrame)/1000,.1);lastFrame=t;remaining=Math.max(0,remaining-dt);$('timer').textContent=remaining.toFixed(1);if(remaining<=0){finishTimeout();return;}requestAnimationFrame(tick);}
+function press(i){if(!running||!accepting||ended||values[i]>=100)return;if(cfg.input==='gamepad')return;values[i]=Math.min(100,values[i]+Number(cfg.power));updateMeter(i);beep(i===0?440:520,.035,'square');if(values[i]>=100)win(i);}
+function updateMeter(i){let n=i+1;$('pct'+n).textContent=Math.round(values[i])+'%';$('fill'+n).style.width=values[i]+'%';}
+function win(i){if(!running||ended)return;ended=true;running=false;accepting=false;stopGamepad();let n=i+1;$('char'+n).classList.add('strike');$('board'+n).classList.add('broken');$('status'+n).textContent='¡TABLA ROTA! ¡GANASTE!';let other=2-i;$('status'+(other+1)).textContent='¡'+cfg.name1.replace(' · AZUL','')+'!';playFile('hit');setTimeout(()=>playFile('win'),250);stopMusic();showResult(cfg.name1===cfg.name2?(i===0?'JUGADOR 1 · AZUL':'JUGADOR 2 · ROJO'): (i===0?cfg.name1:cfg.name2),'¡COMPLETÓ EL 100% ANTES QUE SU RIVAL!');}
+function finishTimeout(){running=false;accepting=false;ended=true;stopGamepad();stopMusic();let failed=[];for(let i=0;i<2;i++){if(values[i]<100){let n=i+1;$('char'+n).classList.add('fail');$('status'+n).textContent='¡NO ALCANZÓ LA FUERZA!';failed.push(i);}else{$('status'+(i+1)).textContent='¡FUERZA COMPLETA!';}}if(failed.length){playFile('fail');setTimeout(()=>playFile('hit'),180);showResult('¡TIEMPO TERMINADO!','Los jugadores que no llegaron al 100% golpean la tabla, aparece la mano roja y la madera no se rompe.');}else showResult('¡EMPATE!','Ambos completaron su medidor.');}
+function showResult(title,detail){$('resultText').textContent=title;$('resultDetail').textContent=detail;$('resultOverlay').classList.add('show');$('startBtn').disabled=false;}
+function stopMusic(){if(musicObject){musicObject.pause();musicObject.currentTime=0;}}
+function startGamepad(){if(cfg.input==='keyboard')return;let prev={};gamepadLoop=setInterval(()=>{let pads=navigator.getGamepads?navigator.getGamepads():[];for(let p of pads){if(!p)continue;let b=p.buttons||[];if(b[0]?.pressed&&!prev[p.index+'a']){if(cfg.input!=='gamepad')press(0);else if(accepting){values[0]=Math.min(100,values[0]+Number(cfg.power));updateMeter(0);if(values[0]>=100)win(0)}}if(b[1]?.pressed&&!prev[p.index+'b']){if(cfg.input!=='gamepad')press(1);else if(accepting){values[1]=Math.min(100,values[1]+Number(cfg.power));updateMeter(1);if(values[1]>=100)win(1)}}prev[p.index+'a']=!!b[0]?.pressed;prev[p.index+'b']=!!b[1]?.pressed;}},30);}
+function stopGamepad(){if(gamepadLoop)clearInterval(gamepadLoop);gamepadLoop=null;}
+window.addEventListener('keydown',e=>{if(e.repeat)return;let k=e.key.toLowerCase();if(k===cfg.key1.toLowerCase()&&cfg.input!=='gamepad'){e.preventDefault();press(0)}if(k===cfg.key2.toLowerCase()&&cfg.input!=='gamepad'){e.preventDefault();press(1)}if(k==='escape'){$('settingsOverlay').classList.remove('show');$('resultOverlay').classList.remove('show');}});
+$('startBtn').onclick=startGame;$('settingsBtn').onclick=()=>{$('settingsOverlay').classList.add('show')};$('closeSettings').onclick=()=>$('settingsOverlay').classList.remove('show');
+$('saveSettings').onclick=()=>{cfg={time:Math.max(5,Math.min(180,Number($('cfgTime').value)||20)),power:Math.max(1,Math.min(50,Number($('cfgPower').value)||8)),key1:($('cfgKey1').value||'a').slice(0,1).toLowerCase(),key2:($('cfgKey2').value||'l').slice(0,1).toLowerCase(),name1:$('cfgName1').value||'JUGADOR 1 · AZUL',name2:$('cfgName2').value||'JUGADOR 2 · ROJO',volume:Math.max(0,Math.min(100,Number($('cfgVolume').value)||0)),input:$('cfgInput').value};localStorage.setItem('tymConfig',JSON.stringify(cfg));applyCfg();$('settingsOverlay').classList.remove('show');};
+$('resultClose').onclick=()=>$('resultOverlay').classList.remove('show');$('playAgain').onclick=()=>{$('resultOverlay').classList.remove('show');startGame()};
+$('fullscreenBtn').onclick=()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()};
+$('audioBtn').onclick=()=>{$('settingsOverlay').classList.add('show');$('musicFile').focus()};
+function loadAudio(input,kind){$(input).addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;let url=URL.createObjectURL(f);if(kind==='music'){musicObject=new Audio(url);musicObject.loop=true;}else audio[kind]=new Audio(url);});}
+loadAudio('musicFile','music');loadAudio('hitFile','hit');loadAudio('winFile','win');loadAudio('failFile','fail');
+applyCfg();resetVisual();
+</script></body></html>

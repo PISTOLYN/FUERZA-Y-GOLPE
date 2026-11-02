@@ -1,0 +1,32 @@
+{
+  "name": "test-your-might",
+  "version": "1.0.0",
+  "description": "Arcade two-player board breaking challenge",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.danielleon.testyourmight",
+    "productName": "Test Your Might",
+    "files": [
+      "index.html",
+      "main.js"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
